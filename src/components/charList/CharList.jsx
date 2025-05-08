@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-import MarvelService from "../../services/MarvelService.js";
+import useMarvelService from "../../services/useMarvelService.js";
 import Loader from "../loader/Loader.jsx";
 import Error from "../error/Error.jsx";
 
@@ -10,26 +10,21 @@ const limit = 6;
 
 export default function CharList({ onCharSelected }) {
   const [charList, setCharList] = useState([]);
-  const [isLoader, setIsLoader] = useState(true);
-  const [isError, setIsError] = useState(false);
   const [newCharLoading, setNewCharLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [charEnded, setCharEnded] = useState(false);
 
-  const marvelService = new MarvelService();
+  const { loading, error, getAllCharacters, clearError } = useMarvelService();
 
   useEffect(() => {
     onRequest();
   }, []);
 
-  const onRequest = (offset) => {
-    onCharListLoading();
-    marvelService.getAllCharacters(offset)
-      .then(onCharListLoaded)
-      .catch(orError)
+  const onRequest = (offset, initial) => {
+    initial ? setNewCharLoading(false) : setNewCharLoading(true);
+    clearError();
+    getAllCharacters(offset).then(onCharListLoaded);
   };
-
-  const onCharListLoading = () => setNewCharLoading(true);
 
   const onCharListLoaded = (newCharList) => {
     let ended = false;
@@ -39,15 +34,9 @@ export default function CharList({ onCharSelected }) {
     }
 
     setCharList(charList => [...charList, ...newCharList]);
-    setIsLoader(false);
     setNewCharLoading(false);
     setOffset(offset => offset + limit);
     setCharEnded(ended);
-  };
-
-  const orError = () => {
-    setIsError(true);
-    setIsLoader(false);
   };
 
   const itemRefs = useRef([]);
@@ -56,7 +45,7 @@ export default function CharList({ onCharSelected }) {
     itemRefs.current.forEach(item => item.classList.remove("char__item_selected"));
     itemRefs.current[id].classList.add("char__item_selected");
     itemRefs.current[id].focus();
-  }
+  };
 
   function renderItems(arr) {
     return (
@@ -92,15 +81,15 @@ export default function CharList({ onCharSelected }) {
     );
   };
 
-  const errorView = isError ? <Error /> : null;
-  const loadingView = isLoader ? <Loader /> : null;
-  const charListView = !(isLoader || isError) ? renderItems(charList) : null;
+  const errorView = error ? <Error /> : null;
+  const loadingView = loading && !newCharLoading ? <Loader /> : null;
+  const items = renderItems(charList);
 
   return (
     <div className="char__list">
       {errorView}
       {loadingView}
-      {charListView}
+      {items}
       <button
         onClick={() => onRequest(offset)}
         disabled={newCharLoading || charEnded}

@@ -4,8 +4,4 @@ import App from "./components/app/App";
 
 import "./style/_main.scss";
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+createRoot(document.getElementById('root')).render(<App />);

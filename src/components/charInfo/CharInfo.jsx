@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/useMarvelService.js";
 import Loader from "../loader/Loader.jsx";
 import Error from "../error/Error.jsx";
 import Skeleton from "../skeleton/Skeleton.jsx";
@@ -9,10 +9,7 @@ import "./_charInfo.scss";
 
 export default function CharInfo({charId}) {
   const [char, setChar] = useState(null);
-  const [isLoader, setIsLoader] = useState(false);
-  const [isError, setIsError] = useState(false);
-
-  const marvelService = new MarvelService();
+  const { loading, error, getCharacter, clearError } = useMarvelService();
 
   useEffect(() => {
     updateChar();
@@ -21,29 +18,16 @@ export default function CharInfo({charId}) {
   const updateChar = () => {
     if (!charId) return;
 
-    onCharLoading();
-
-    marvelService.getCharacter(charId)
-      .then(onCharLoaded)
-      .catch(onError);
+    clearError();
+    getCharacter(charId).then(onCharLoaded);
   }
 
-  const onCharLoaded = (char) => {
-    setChar(char);
-    setIsLoader(false);
-  }
+  const onCharLoaded = (char) => setChar(char);
 
-  const onCharLoading = () => setIsLoader(true);
-
-  const onError = () => {
-    setIsError(true);
-    setIsLoader(false);
-  }
-
-  const skeletonView = char || isLoader || isError ? null : <Skeleton />
-  const errorView = isError ? <Error /> : null;
-  const loadingView = isLoader ? <Loader /> : null;
-  const charView = !(isLoader || isError || !char) ? <View char={char} /> : null;
+  const skeletonView = char || loading || error ? null : <Skeleton />
+  const errorView = error ? <Error /> : null;
+  const loadingView = loading ? <Loader /> : null;
+  const charView = !(loading || error || !char) ? <View char={char} /> : null;
   
   return (
     <div className="char__info">

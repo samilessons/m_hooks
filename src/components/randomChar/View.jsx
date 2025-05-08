@@ -1,9 +1,11 @@
 export default function View({ char }) {
   const { name, description, thumbnail, homepage, wiki } = char;
   let imgStyle = { objectFit: "cover" };
-  if (thumbnail.includes("image_not_available.jpg")) {
+ 
+  if (thumbnail?.includes("image_not_available.jpg")) {
     imgStyle = { objectFit: "contain" };
   }
+
   return (
     <div className="randomchar__block">
       <img

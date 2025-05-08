@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import MarvelService from "../../services/MarvelService.js";
+import useMarvelService from "../../services/useMarvelService.js";
 import Loader from "../loader/Loader.jsx";
 import Error from "../error/Error.jsx";
 import View from "./View.jsx";
@@ -10,14 +10,10 @@ import mjolnir from "../../assets/img/mjolnir.png"
 
 export default function RandomChar() {
   const [char, setChar] = useState({});
-  const [isLoader, setIsLoader] = useState(true);
-  const [isError, setIsError] = useState(false);
-
-  const marvelService = new MarvelService();
+  const {loading, error, getCharacter, clearError} = useMarvelService();
   
   useEffect(() => {
     updateChar();
-
     const timerID = setInterval(updateChar, 60000);
 
     return () => {
@@ -25,28 +21,18 @@ export default function RandomChar() {
     }
   }, []);
 
-  const onCharLoaded = (char) => {
-    setChar(char);
-    setIsLoader(false);
-  }
-
-  const onError = () => {
-    setIsError(true);
-    setIsLoader(false);
-  }
+  const onCharLoaded = (char) => setChar(char);
 
   const updateChar = () => {
+    clearError();
     // const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
-    const id = Math.floor(Math.random() * (20 - 1) + 1);
-    setIsLoader(true);
-    marvelService.getCharacter(id)
-      .then(onCharLoaded)
-      .catch(onError)
+    const id = Math.floor(Math.random() * (25 - 1) + 1);
+    getCharacter(id).then(onCharLoaded);
   }
 
-  const errorView = isError ? <Error /> : null;
-  const loadingView = isLoader ? <Loader /> : null;
-  const charView = !(isLoader || isError) ? <View char={char} /> : null;
+  const errorView = error ? <Error /> : null;
+  const loadingView = loading ? <Loader /> : null;
+  const charView = !(loading || error) ? <View char={char} /> : null;
   return (
     <div className="randomchar">
       {errorView}

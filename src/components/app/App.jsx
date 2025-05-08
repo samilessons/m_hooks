@@ -27,8 +27,12 @@ export default function App() {
           <RandomChar />
         </ErrorBoundary>
         <div className="char__content">
-          <CharList onCharSelected={onCharSelected} />
-          <CharInfo charId={selectedChar} />
+          <ErrorBoundary>
+            <CharList onCharSelected={onCharSelected} />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <CharInfo charId={selectedChar} />
+          </ErrorBoundary>
         </div>
         <img className="bg-decoration" src={vision} alt="vision" />
       </main>
